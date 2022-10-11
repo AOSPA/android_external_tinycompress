@@ -53,8 +53,6 @@
 #ifndef __TINYCOMPRESS_H
 #define __TINYCOMPRESS_H
 
-#include <stdbool.h>
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
