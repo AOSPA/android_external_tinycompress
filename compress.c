@@ -397,49 +397,51 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 		return oops(compress, ENODEV, "device not ready");
 	fds.events = POLLIN;
 
-	if (compress->ops->ioctl(compress->data, SNDRV_COMPRESS_AVAIL, &avail))
-		return oops(compress, errno, "cannot get avail");
+	while (size) {
+		if (compress->ops->ioctl(compress->data, SNDRV_COMPRESS_AVAIL, &avail))
+			return oops(compress, errno, "cannot get avail");
 
-	if ( (avail.avail < frag_size) && (avail.avail < size) ) {
-		/* Less than one fragment available and not at the
-			* end of the read, so poll
-			*/
-		if (compress->nonblocking)
-			return total;
+		if ( (avail.avail < frag_size) && (avail.avail < size) ) {
+			/* Less than one fragment available and not at the
+			 * end of the read, so poll
+			 */
+			if (compress->nonblocking)
+				return total;
 
-		ret = compress->ops->poll(compress->data, &fds, 1,
-						compress->max_poll_wait_ms);
-		if (fds.revents & POLLERR) {
-			return oops(compress, EIO, "poll returned error!");
+			ret = compress->ops->poll(compress->data, &fds, 1,
+							compress->max_poll_wait_ms);
+			if (fds.revents & POLLERR) {
+				return oops(compress, EIO, "poll returned error!");
+			}
+			/* A pause will cause -EBADFD or zero.
+			 * This is not an error, just stop reading */
+			if ((ret == 0) || (ret < 0 && errno == EBADFD))
+				break;
+			if (ret < 0)
+				return oops(compress, errno, "poll error");
+			if (fds.revents & POLLIN) {
+				continue;
+			}
 		}
-		/* A pause will cause -EBADFD or zero.
-			* This is not an error, just stop reading */
-		if ((ret == 0) || (ret < 0 && errno == EBADFD))
-			return 0;
-		if (ret < 0)
-			return oops(compress, errno, "poll error");
-		if (fds.revents & POLLIN) {
-			return 0;
+		/* read avail bytes */
+		if (size > avail.avail)
+			to_read = avail.avail;
+		else
+			to_read = size;
+		num_read = compress->ops->read(compress->data, cbuf, to_read);
+		if (num_read < 0) {
+			/* If play was paused the read returns -EBADFD */
+			if (errno == EBADFD)
+				break;
+			return oops(compress, errno, "read failed!");
 		}
-	}
-	/* read avail bytes */
-	if (size > avail.avail)
-		to_read = avail.avail;
-	else
-		to_read = size;
-	num_read = compress->ops->read(compress->data, cbuf, to_read);
-	if (num_read < 0) {
-		/* If play was paused the read returns -EBADFD */
-		if (errno == EBADFD)
-		        return 0;
-		return oops(compress, errno, "read failed!");
+
+		size -= num_read;
+		cbuf += num_read;
+		total += num_read;
 	}
 
-	size -= num_read;
-	cbuf += num_read;
-	total += num_read;
-
-	return num_read;
+	return total;
 }
 
 int compress_start(struct compress *compress)
