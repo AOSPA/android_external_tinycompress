@@ -43,6 +43,9 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 #include "tinycompress/compress_plugin.h"
+#ifdef TARGET_USES_AR_AUDIO
+#include "tinycompress/tinycompress.h"
+#endif
 #include "sound/compress_offload.h"
 #include "compress_ops.h"
 #include "snd_utils.h"
@@ -95,11 +98,18 @@ static int compress_plug_set_params(struct compress_plug_data *plug_data,
 	   params->buffer.fragments == 0)
 		return -EINVAL;
 
-	rc = plugin->ops->set_params(plugin, params);
+    rc = plugin->ops->set_params(plugin, params);
+#ifdef TARGET_USES_AR_AUDIO
+	if (!rc) {
+		plugin->state = COMPRESS_PLUG_STATE_SETUP;
+		if (plug_data->flags & COMPRESS_OUT)
+			plugin->state = COMPRESS_PLUG_STATE_PREPARED;
+	}
+else /*#ifdef TARGET_USES_AR_AUDIO*/
 	if (!rc)
 		plugin->state = COMPRESS_PLUG_STATE_SETUP;
-
-	return rc;
+#endif /*TARGET_USES_AR_AUDIO*/
+    return rc;
 }
 
 static int compress_plug_avail(struct compress_plug_data *plug_data,

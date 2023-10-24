@@ -22,6 +22,9 @@ license {
 cc_library_shared {
     name: "libtinycompress",
     vendor: true,
+    defaults: [
+        "target_uses_ar_audio_defaults",
+    ],
 
     cflags: [
         "-Wall",
