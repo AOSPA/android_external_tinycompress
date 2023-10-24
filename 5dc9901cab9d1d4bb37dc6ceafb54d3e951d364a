@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "554e27a0_77932c4e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000579
+      },
+      "writtenOn": "2023-10-24T12:49:25Z",
+      "side": 1,
+      "message": "can we keep upstream behaviour as default, similar to how we handled display commonsys?",
+      "revId": "5dc9901cab9d1d4bb37dc6ceafb54d3e951d364a",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
+    }
+  ]
+}
