@@ -16,6 +16,23 @@
       "message": "can we keep upstream behaviour as default, similar to how we handled display commonsys?",
       "revId": "5dc9901cab9d1d4bb37dc6ceafb54d3e951d364a",
       "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "050ab5cf_c3f41235",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000012
+      },
+      "writtenOn": "2023-10-24T15:28:11Z",
+      "side": 1,
+      "message": "let\u0027s do this as one commit.  Also, I don\u0027t like the AR_AUDIO flag.  Let\u0027s do it specific to this commit (could be TARGET_TINYCOMPRESS_NO_LOOP or something along those lines).  There could be further breaking changes for newer SoCs.",
+      "revId": "5dc9901cab9d1d4bb37dc6ceafb54d3e951d364a",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
     }
   ]
 }
