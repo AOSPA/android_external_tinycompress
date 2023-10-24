@@ -53,6 +53,10 @@
 #ifndef __TINYCOMPRESS_H
 #define __TINYCOMPRESS_H
 
+#ifdef TARGET_USES_AR_AUDIO
+#include <stdbool.h>
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
