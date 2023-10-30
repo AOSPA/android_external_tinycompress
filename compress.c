@@ -397,6 +397,10 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 		return oops(compress, ENODEV, "device not ready");
 	fds.events = POLLIN;
 
+#ifdef NO_LOOP_COMPRESS_READ
+	while (size) {
+#endif
+
 	if (compress->ops->ioctl(compress->data, SNDRV_COMPRESS_AVAIL, &avail))
 		return oops(compress, errno, "cannot get avail");
 
@@ -439,7 +443,12 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 	cbuf += num_read;
 	total += num_read;
 
+#ifdef NO_LOOP_COMPRESS_READ
+        }
+        return total;
+#else
 	return num_read;
+#endif
 }
 
 int compress_start(struct compress *compress)
