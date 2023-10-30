@@ -43,7 +43,9 @@
 #include <linux/ioctl.h>
 #include <sound/asound.h>
 #include "tinycompress/compress_plugin.h"
+#ifndef LOOP_COMPRESS_READ
 #include "tinycompress/tinycompress.h"
+#endif
 #include "sound/compress_offload.h"
 #include "compress_ops.h"
 #include "snd_utils.h"
@@ -99,8 +101,10 @@ static int compress_plug_set_params(struct compress_plug_data *plug_data,
 	rc = plugin->ops->set_params(plugin, params);
 	if (!rc) {
 		plugin->state = COMPRESS_PLUG_STATE_SETUP;
+#ifndef LOOP_COMPRESS_READ
 		if (plug_data->flags & COMPRESS_OUT)
 			plugin->state = COMPRESS_PLUG_STATE_PREPARED;
+#endif
 	}
 
 	return rc;

@@ -397,6 +397,10 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 		return oops(compress, ENODEV, "device not ready");
 	fds.events = POLLIN;
 
+#ifdef LOOP_COMPRESS_READ
+	while (size) {
+#endif
+
 	if (compress->ops->ioctl(compress->data, SNDRV_COMPRESS_AVAIL, &avail))
 		return oops(compress, errno, "cannot get avail");
 
@@ -415,11 +419,19 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 		/* A pause will cause -EBADFD or zero.
 			* This is not an error, just stop reading */
 		if ((ret == 0) || (ret < 0 && errno == EBADFD))
+#ifdef LOOP_COMPRESS_READ
+			break;
+#else
 			return 0;
+#endif
 		if (ret < 0)
 			return oops(compress, errno, "poll error");
 		if (fds.revents & POLLIN) {
+#ifdef LOOP_COMPRESS_READ
+			continue;
+#else
 			return 0;
+#endif
 		}
 	}
 	/* read avail bytes */
@@ -431,7 +443,11 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 	if (num_read < 0) {
 		/* If play was paused the read returns -EBADFD */
 		if (errno == EBADFD)
+#ifdef LOOP_COMPRESS_READ
+			break;
+#else
 		        return 0;
+#endif
 		return oops(compress, errno, "read failed!");
 	}
 
@@ -439,7 +455,12 @@ int compress_read(struct compress *compress, void *buf, unsigned int size)
 	cbuf += num_read;
 	total += num_read;
 
+#ifdef LOOP_COMPRESS_READ
+        }
+        return total;
+#else
 	return num_read;
+#endif
 }
 
 int compress_start(struct compress *compress)
