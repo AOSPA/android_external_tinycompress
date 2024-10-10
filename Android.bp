@@ -19,9 +19,37 @@ license {
     ],
 }
 
+soong_config_module_type {
+    name: "tinycompress_cc_defaults",
+    module_type: "cc_defaults",
+    config_namespace: "tinycompress",
+    bool_variables: [
+        "enable_extended_compress_format", // AUDIO_FEATURE_ENABLED_EXTENDED_COMPRESS_FORMAT
+        "loop_compress_read", // TARGET_LOOP_COMPRESS_READ
+    ],
+    properties: [
+        "cflags",
+    ],
+}
+
+tinycompress_cc_defaults {
+    name: "libtinycompress-defaults",
+    soong_config_variables: {
+        enable_extended_compress_format: {
+            cflags: ["-DENABLE_EXTENDED_COMPRESS_FORMAT"],
+        },
+        loop_compress_read: {
+            cflags: ["-DLOOP_COMPRESS_READ"],
+        },
+    },
+}
+
 cc_library_shared {
     name: "libtinycompress",
     vendor: true,
+    defaults: [
+        "libtinycompress-defaults",
+    ],
 
     cflags: [
         "-Wall",
@@ -34,27 +62,30 @@ cc_library_shared {
         "compress.c",
         "utils.c",
         "compress_hw.c",
-         "compress_plugin.c",
-         "snd_utils.c",
+        "compress_plugin.c",
+        "snd_utils.c",
     ],
     shared_libs: [
         "libcutils",
         "libutils",
     ],
-    header_libs: [
-        "device_kernel_headers",
-    ],
+    header_libs: ["device_kernel_headers"]+["qti_kernel_headers"],
 }
 
 cc_library_shared {
     name: "libtinycompress_vendor",
     vendor: true,
+    defaults: [
+        "libtinycompress-defaults",
+    ],
 
     cflags: [
         "-Wall",
         "-Werror",
         "-Wno-macro-redefined",
         "-Wno-unused-function",
+        "-DUSE_VENDOR_EXTN",
+        "-DENABLE_EXTENDED_COMPRESS_FORMAT",
     ],
     export_include_dirs: ["include"],
     srcs: [
@@ -65,9 +96,7 @@ cc_library_shared {
         "libcutils",
         "libutils",
     ],
-    header_libs: [
-        "device_kernel_headers",
-    ],
+    header_libs: ["device_kernel_headers"]+["qti_kernel_headers"],
 }
 
 cc_binary {
